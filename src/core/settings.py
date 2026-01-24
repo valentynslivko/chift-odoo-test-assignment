@@ -28,6 +28,22 @@ class Settings(BaseSettings):
     REDIS_CACHE_URI: str = Field("redis://redis:6379/2")
     BACKEND_CORS_ORIGINS: Optional[str | list] = Field(default="[*]")
 
+    ODOO_API_KEY: str
+    ODOO_HOST: str
+    ODOO_PORT: str
+    ODOO_DATABASE: str
+    ODOO_USER: str
+
+    CELERY_BEAT_TASK_INTERVAL: int = Field(
+        600, description="Interval in seconds to run the celery beat task"
+    )
+
+    SECRET_KEY: str = Field(..., description="Secret key for JWT")
+    ALGORITHM: str = Field("HS256", description="Algorithm for JWT")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(
+        60, description="Access token expiration in minutes"
+    )
+
     @model_validator(mode="after")
     def build_database_uri(self) -> Self:
         if not self.SQLALCHEMY_ASYNC_DATABASE_URI:

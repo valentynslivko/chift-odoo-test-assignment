@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.logger import init_logging
 from src.core.settings import get_settings
+from src.middleware.pagination import PaginationMiddleware
+from src.routers import auth_router, contacts_router, invoices_router, odoo_router
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -34,6 +36,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(PaginationMiddleware)
+app.include_router(auth_router)
+app.include_router(contacts_router)
+app.include_router(odoo_router)
+app.include_router(invoices_router)
 
 
 @app.get("/health")
