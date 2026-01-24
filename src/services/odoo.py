@@ -80,5 +80,19 @@ class OdooService:
     ) -> int:
         return self.client.create_invoice(partner_id, invoice_lines)
 
+    async def create_and_insert_invoice(
+        self,
+        db: AsyncDBSession,
+        partner_id: int,
+        invoice_lines: list[InvoiceCreatePayload],
+    ) -> int:
+        id_ = self.create_invoice(partner_id, invoice_lines)
+        if id_:
+            obj_in = OdooInvoiceCreate(
+                odoo_id=id_, partner_id=partner_id, invoice_lines=invoice_lines
+            )
+            await self.insert_invoice(db, obj_in=obj_in)
+        return id_
+
 
 OdooServiceDep = Annotated[OdooService, Depends(OdooService)]
