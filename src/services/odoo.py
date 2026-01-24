@@ -4,16 +4,22 @@ from fastapi import Depends, HTTPException
 
 from src.db.session import AsyncDBSession
 from src.repositories.contacts import odoo_contact_repository
+from src.repositories.invoices import odoo_invoice_repository
 from src.rpc.client import OdooClient
-from src.schemas.odoo.schemas import OdooContactCreate, OdooContactUpdate
+from src.schemas.api.odoo import InvoiceCreatePayload
+from src.schemas.odoo.schemas import (
+    OdooContactCreate,
+    OdooContactUpdate,
+    OdooInvoiceCreate,
+)
 
 
 class OdooService:
     def __init__(self):
         self.client = OdooClient()  # normally injected via DI
 
-    def get_contacts_from_odoo(self, limit: int = 100) -> list[dict]:
-        return self.client.get_contacts(limit=limit)
+    def get_contacts_from_odoo(self, limit: int = 100, offset: int = 0) -> list[dict]:
+        return self.client.get_contacts(limit=limit, offset=offset)
 
     def version(self) -> str:
         return self.client.version()
@@ -48,6 +54,12 @@ class OdooService:
             obj_in=obj_in,
         )
 
+    async def insert_invoice(self, db: AsyncDBSession, obj_in: OdooInvoiceCreate):
+        return await odoo_invoice_repository.create(
+            db=db,
+            obj_in=obj_in,
+        )
+
     async def update_contact_in_db(
         self, db: AsyncDBSession, contact_id: int, obj_in: OdooContactUpdate
     ):
@@ -59,6 +71,14 @@ class OdooService:
         if not db_obj:
             raise HTTPException(status_code=404, detail="Contact not found")
         return await odoo_contact_repository.delete(db, db_obj)
+
+    def get_invoices_from_odoo(self, limit: int = 100, offset: int = 0) -> list[dict]:
+        return self.client.get_invoices(limit=limit, offset=offset)
+
+    def create_invoice(
+        self, partner_id: int, invoice_lines: list[InvoiceCreatePayload]
+    ) -> int:
+        return self.client.create_invoice(partner_id, invoice_lines)
 
 
 OdooServiceDep = Annotated[OdooService, Depends(OdooService)]

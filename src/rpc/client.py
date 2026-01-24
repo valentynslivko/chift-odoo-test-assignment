@@ -3,6 +3,7 @@ import xmlrpc.client
 from typing import Any
 
 from src.core.settings import get_settings
+from src.schemas.api.odoo import InvoiceCreatePayload
 from src.utils.exceptions import OdooFaultError, OdooProtocolError
 
 settings = get_settings()
@@ -75,7 +76,12 @@ class OdooClient:
             raise err
 
     def get_data(
-        self, model: str, fields: list[str], domain: list, limit: int = 100
+        self,
+        model: str,
+        fields: list[str],
+        domain: list,
+        limit: int = 100,
+        offset: int = 0,
     ) -> list[dict]:
         return self._call(
             self.models.execute_kw,
@@ -85,7 +91,7 @@ class OdooClient:
             model,
             "search_read",
             [domain],
-            {"fields": fields, "limit": limit},
+            {"fields": fields, "limit": limit, "offset": offset},
         )
 
     def create_data(self, model: str, values: dict) -> int:
@@ -121,10 +127,24 @@ class OdooClient:
             [[id]],
         )
 
-    def get_contacts(self, is_company: bool = False, limit: int = 100) -> list[dict]:
+    def get_count(self, model: str, domain: list) -> int:
+        return self._call(
+            self.models.execute_kw,
+            self.db,
+            self.uid,
+            self.api_key,
+            model,
+            "search_count",
+            [domain],
+        )
+
+    def get_contacts(
+        self, is_company: bool = False, limit: int = 100, offset: int = 0
+    ) -> list[dict]:
         """
         :param is_company: if True, return companies, if False, return contacts
         :param limit: number of records to return
+        :param offset: number of records to skip
         """
         return self.get_data(
             model="res.partner",
@@ -137,6 +157,7 @@ class OdooClient:
             ],
             domain=[("is_company", "=", is_company)],
             limit=limit,
+            offset=offset,
         )
 
     def create_contact(
@@ -171,3 +192,75 @@ class OdooClient:
                 "parent_id": company_id,
             },
         )
+
+    def get_invoices(
+        self, domain: list | None = None, limit: int = 100, offset: int = 0
+    ) -> list[dict]:
+        """
+        Get invoices from Odoo.
+        Args:
+            domain: list of tuples for filtering
+            limit: max number of records
+            offset: number of records to skip
+
+        Returns:
+            list[dict]: list of invoices
+        """
+        if domain is None:
+            domain = [("move_type", "=", "out_invoice")]
+        return self.get_data(
+            model="account.move",
+            fields=[
+                "id",
+                "name",
+                "partner_id",
+                "invoice_date",
+                "amount_total",
+                "state",
+                "move_type",
+            ],
+            domain=domain,
+            limit=limit,
+            offset=offset,
+        )
+
+    def get_partners(
+        self, domain: list | None = None, limit: int = 100, offset: int = 0
+    ) -> list[dict]:
+        if domain is None:
+            domain = []
+        return self.get_data(
+            model="res.partner",
+            fields=["id", "name", "email", "display_name", "company_id"],
+            domain=domain,
+            limit=limit,
+            offset=offset,
+        )
+
+    def create_invoice(
+        self,
+        partner_id: int,
+        invoice_lines: list[InvoiceCreatePayload],
+        move_type: str = "out_invoice",
+        **kwargs,
+    ) -> int:
+        """
+        Create an invoice in Odoo.
+        Args:
+            partner_id: Odoo partner ID
+            invoice_lines: list of dicts with keys like 'product_id', 'quantity', 'price_unit'
+            move_type: type of the move (default: out_invoice)
+            **kwargs: additional fields for account.move
+
+        Returns:
+            int: Odoo invoice ID
+        """
+        lines = [(0, 0, line.model_dump(mode="json")) for line in invoice_lines]
+
+        values = {
+            "partner_id": partner_id,
+            "move_type": move_type,
+            "invoice_line_ids": lines,
+            **kwargs,
+        }
+        return self.create_data(model="account.move", values=values)
