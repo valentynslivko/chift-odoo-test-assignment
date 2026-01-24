@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.logger import init_logging
 from src.core.settings import get_settings
+from src.routers.odoo import router as odoo_router
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(odoo_router)
 
 
 @app.get("/health")
