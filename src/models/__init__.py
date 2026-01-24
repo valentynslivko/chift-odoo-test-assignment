@@ -9,6 +9,13 @@ from src.db.base import Base
 from src.db.mixins import DateTimeMixin
 
 
+class User(Base, DateTimeMixin):
+    id: Mapped[uuid_pk]
+    email: Mapped[str] = mapped_column(index=True, unique=True)
+    username: Mapped[str] = mapped_column(index=True)
+    hashed_password: Mapped[str]
+
+
 class OdooContact(Base, DateTimeMixin):
     id: Mapped[uuid_pk]
     odoo_id: Mapped[int] = mapped_column(index=True)
