@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     REDIS_CACHE_URI: str = Field("redis://redis:6379/2")
     BACKEND_CORS_ORIGINS: Optional[str | list] = Field(default="[*]")
 
+    ODOO_API_KEY: str
+    ODOO_HOST: str
+    ODOO_PORT: str
+    ODOO_DATABASE: str
+    ODOO_USER: str
+
     @model_validator(mode="after")
     def build_database_uri(self) -> Self:
         if not self.SQLALCHEMY_ASYNC_DATABASE_URI:
