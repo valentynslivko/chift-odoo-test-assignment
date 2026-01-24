@@ -1,0 +1,1 @@
+# chift-odoo-test-assignment
