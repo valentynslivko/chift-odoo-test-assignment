@@ -1,20 +1,29 @@
 from fastapi import APIRouter
 
+from src.core.auth.dependencies import CurrentUserDep
 from src.db.session import AsyncDBSession
 from src.repositories.contacts import odoo_contact_repository
 from src.services.odoo import OdooServiceDep
 
-router = APIRouter()
+router = APIRouter(prefix="/api/odoo", tags=["odoo"])
 
 
-@router.get("/test")
-async def test(odoo_service: OdooServiceDep):
-    return odoo_service.get_contacts_from_odoo()
+@router.get("/get-contacts-from-odoo")
+async def get_contacts_from_odoo(
+    user: CurrentUserDep, odoo_service: OdooServiceDep, limit: int = 100
+):
+    return odoo_service.get_contacts_from_odoo(limit=limit)
 
 
-@router.post("/create-contact", include_in_schema=False)
+@router.post("/create-contact")
+# TODO: include_in_schema=False
 async def create_contact(
-    odoo_service: OdooServiceDep, name: str, email: str, company_name: str
+    user: CurrentUserDep,
+    odoo_service: OdooServiceDep,
+    db: AsyncDBSession,
+    name: str,
+    email: str,
+    company_name: str,
 ):
     """
     Helper endpoint to create a contact in Odoo for tests during the development.
@@ -26,12 +35,13 @@ async def create_contact(
     Returns:
         int: Odoo contact ID
     """
-    return odoo_service.create_contact(name, email, company_name)
+    return await odoo_service.create_and_insert_contact(db, name, email, company_name)
 
 
 @router.get("/get-contacts")
 async def get_contacts(
     db: AsyncDBSession,
+    user: CurrentUserDep,
     is_company: bool = False,
     limit: int = 100,
 ):
