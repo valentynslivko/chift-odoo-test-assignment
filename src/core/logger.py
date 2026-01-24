@@ -5,7 +5,7 @@ from src.core.settings import get_settings
 settings = get_settings()
 
 LOGGER_FORMAT = logging.Formatter(
-    fmt="{asctime} | {levelname} | {name} | {requested_by} | {message}",
+    fmt="{asctime} | {levelname} | {name} | {message}",
     datefmt="%d/%m/%y %H:%M:%S",
     style="{",  # Enables f-string syntax.
 )
