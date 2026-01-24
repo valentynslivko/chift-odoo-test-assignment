@@ -21,14 +21,34 @@ class OdooService:
     def create_contact(self, name: str, email: str, company_name: str) -> int:
         return self.client.create_contact(name, email, company_name)
 
-    def insert_contact(
+    async def create_and_insert_contact(
         self, db: AsyncDBSession, name: str, email: str, company_name: str
-    ):
-        return odoo_contact_repository.create(
-            db, OdooContactCreate(name=name, email=email, company_name=company_name)
+    ) -> int:
+        """
+        Create a contact in Odoo and insert it into the database.
+        Args:
+            db: AsyncDBSession
+            name: str
+            email: str
+            company_name: str
+        Returns:
+            int: Odoo API contact ID
+        """
+        id_ = self.create_contact(name, email, company_name)
+        if id_:
+            obj_in = OdooContactCreate(
+                odoo_id=id_, name=name, email=email, company_name=company_name
+            )
+            await self.insert_contact(db, obj_in=obj_in)
+        return id_
+
+    async def insert_contact(self, db: AsyncDBSession, obj_in: OdooContactCreate):
+        return await odoo_contact_repository.create(
+            db=db,
+            obj_in=obj_in,
         )
 
-    async def update_contact(
+    async def update_contact_in_db(
         self, db: AsyncDBSession, contact_id: int, obj_in: OdooContactUpdate
     ):
         db_obj = await odoo_contact_repository.get(db, contact_id)

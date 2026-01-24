@@ -4,10 +4,11 @@ from pydantic import BaseModel
 
 
 class OdooContactCreate(BaseModel):
+    odoo_id: int
     name: str
     email: str
     company_name: str
-    company_id: list[int | str | dict] | bool
+    company_id: Optional[list[int | str | dict] | bool] = None
 
 
 class OdooContactUpdate(BaseModel):
