@@ -11,12 +11,16 @@ celery_app = Celery(
     include=["src.celery.tasks"],
 )
 
-# celery_app.conf.beat_schedule = {
-#     "run-periodic-task": {
-#         # schedule expects seconds
-#         "schedule": 60,  # TODO: settings
-#     },
-# }
+celery_app.conf.beat_schedule = {
+    "sync-odoo-contacts-periodic": {
+        "task": "sync_odoo_contacts",
+        "schedule": settings.CELERY_BEAT_TASK_INTERVAL,
+    },
+    "sync-odoo-invoices-periodic": {
+        "task": "sync_odoo_invoices",
+        "schedule": settings.CELERY_BEAT_TASK_INTERVAL,
+    },
+}
 celery_app.conf.timezone = "UTC"
 celery_app.autodiscover_tasks()
 
