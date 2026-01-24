@@ -39,6 +39,9 @@ updated_at = Annotated[
 nullable_string_256 = Annotated[
     Optional[str], mapped_column(String(256), nullable=True)
 ]
+indexed_nullable_string_256 = Annotated[
+    Optional[str], mapped_column(String(256), index=True, nullable=True)
+]
 nullable_int = Annotated[Optional[int], mapped_column(Integer, nullable=True)]
 nullable_datetime = Annotated[
     Optional[datetime], mapped_column(DateTime(timezone=True), nullable=True)
