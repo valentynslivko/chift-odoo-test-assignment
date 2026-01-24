@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.logger import init_logging
 from src.core.settings import get_settings
+from src.routers.auth import router as auth_router
 from src.routers.odoo import router as odoo_router
 
 settings = get_settings()
@@ -35,6 +36,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(auth_router)
 app.include_router(odoo_router)
 
 
