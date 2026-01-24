@@ -1,0 +1,71 @@
+services:
+  fastapi:
+    build:
+      context: .
+    ports:
+      - "8003:8000"
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./src/:/app/src/
+
+    command: ["/app/.venv/bin/python", "main.py"]
+
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    ports:
+      - "5439:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+    restart: unless-stopped
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+
+  redis:
+    restart: unless-stopped
+    image: redis:7
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+
+  # abm enrichment tasks
+  celery-worker:
+    restart: unless-stopped
+    build:
+      context: .
+    command: watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A src.celery.celery_app worker  --loglevel=debug
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    volumes:
+      - ./src/:/app/src/
+
+  celery-beat:
+    container_name: celery-beat
+    restart: unless-stopped
+    build:
+      context: .
+    command: watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A src.celery.celery_app beat -s /tmp/celerybeat-schedule --loglevel=debug
+    volumes:
+      - celerybeat-schedule:/tmp
+      - ./src/:/app/src/
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+volumes:
+  postgres-volume:
+  redis-data:
+  celerybeat-schedule:
