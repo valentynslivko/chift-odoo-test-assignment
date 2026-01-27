@@ -19,6 +19,6 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/chift-odoo-test-task
+            cd ~/chift-odoo-test-assignment
             git pull origin main
             docker compose up -d --build
