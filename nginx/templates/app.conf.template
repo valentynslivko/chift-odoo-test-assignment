@@ -1,9 +1,12 @@
-server {
-    listen 80;
-    server_name ${DOMAIN};
+http {
+    server_names_hash_bucket_size 128;
 
+    server {
+        listen 80;
+        server_name ec2-3-121-159-227.eu-central-1.compute.amazonaws.com;
 
-    location / {
-        return 301 https://$host$request_uri;
+        location / {
+            return 301 https://$host$request_uri;
+        }
     }
 }

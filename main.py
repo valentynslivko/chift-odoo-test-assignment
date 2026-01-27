@@ -54,4 +54,11 @@ async def root():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", log_config=None, host="0.0.0.0", reload=True, port=8000)
+    uvicorn.run(
+        "main:app",
+        log_config=None,
+        host="0.0.0.0",
+        reload=True,
+        port=8000,
+        proxy_headers=True,
+    )
