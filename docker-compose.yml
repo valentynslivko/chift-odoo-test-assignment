@@ -14,6 +14,13 @@ services:
       - ./src/:/app/src/
 
     command: ["/app/.venv/bin/python", "main.py"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+        reservations:
+          memory: 128M
 
   nginx:
     image: nginx:1.25-alpine
@@ -29,6 +36,13 @@ services:
       - ./data/certbot/www:/var/www/certbot
     depends_on:
       - fastapi
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 64M
+        reservations:
+          memory: 32M
 
   certbot:
     image: certbot/certbot
@@ -52,6 +66,13 @@ services:
     restart: unless-stopped
     volumes:
       - postgres-volume:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+        reservations:
+          memory: 128M
 
   redis:
     restart: unless-stopped
@@ -60,6 +81,13 @@ services:
       - "6380:6379"
     volumes:
       - redis-data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 64M
+        reservations:
+          memory: 32M
 
   celery-worker:
     restart: unless-stopped
@@ -72,6 +100,13 @@ services:
       - redis
     volumes:
       - ./src/:/app/src/
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 192M
+        reservations:
+          memory: 64M
 
   celery-beat:
     container_name: celery-beat
