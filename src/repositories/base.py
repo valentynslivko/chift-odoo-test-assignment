@@ -15,13 +15,6 @@ logger = getLogger(__name__)
 
 class CRUDBase(Generic[ModelType]):
     def __init__(self, model: Type[ModelType]):
-        """
-        CRUD object with default methods to Create, Read, Update, Delete (CRUD).
-
-        **Parameters**
-
-        * `model`: A SQLAlchemy model class
-        """
         self.model = model
 
     async def get(self, db: AsyncSession, id: Any) -> Optional[ModelType]:

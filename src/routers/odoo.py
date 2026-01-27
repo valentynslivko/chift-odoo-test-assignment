@@ -18,6 +18,15 @@ async def get_contacts_from_odoo(
     limit: int = 100,
     offset: int = 0,
 ):
+    """
+    Helper endpoint to get contacts from Odoo for tests during the development.
+    Args:
+        limit: int
+        offset: int
+
+    Returns:
+        list[OdooContact]: list of Odoo contacts
+    """
     return odoo_service.get_contacts_from_odoo(limit=limit, offset=offset)
 
 
@@ -50,9 +59,20 @@ async def get_contacts(
     user: CurrentUserDep,
     is_company: bool = False,
     limit: int = 100,
+    offset: int = 0,
 ):
+    """
+    Helper endpoint to get contacts from Odoo for tests during the development.
+    Args:
+        is_company: bool
+        limit: int
+        offset: int
+
+    Returns:
+        list[OdooContact]: list of Odoo contacts
+    """
     return await odoo_contact_repository.get_contacts(
-        db=db, is_company=is_company, limit=limit
+        db=db, is_company=is_company, limit=limit, offset=offset
     )
 
 
@@ -63,6 +83,15 @@ async def get_invoices_from_odoo(
     limit: int = 100,
     offset: int = 0,
 ):
+    """
+    Helper endpoint to get invoices from Odoo for tests during the development.
+    Args:
+        limit: int
+        offset: int
+
+    Returns:
+        list[OdooInvoice]: list of Odoo invoices
+    """
     return odoo_service.get_invoices_from_odoo(limit=limit, offset=offset)
 
 
@@ -74,6 +103,15 @@ async def create_invoice(
     partner_id: int,
     invoice_lines: list[InvoiceCreatePayload],
 ):
+    """
+    Helper endpoint to create an invoice in Odoo for tests during the development.
+    Args:
+        partner_id: int
+        invoice_lines: list[InvoiceCreatePayload]
+
+    Returns:
+        int: Odoo invoice ID
+    """
     return await odoo_service.create_and_insert_invoice(
         db=db, partner_id=partner_id, invoice_lines=invoice_lines
     )
@@ -86,4 +124,13 @@ async def get_partners_from_odoo(
     limit: int = 100,
     offset: int = 0,
 ):
+    """
+    Helper endpoint to get partners from Odoo for tests during the development.
+    Args:
+        limit: int
+        offset: int
+
+    Returns:
+        list[OdooPartner]: list of Odoo partners
+    """
     return odoo_service.client.get_partners(limit=limit, offset=offset)
