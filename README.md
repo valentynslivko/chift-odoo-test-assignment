@@ -6,7 +6,7 @@
 - **`/api/utils/...` endpoints contain interfaces to access/work with Odoo directly with my API as a proxy, I've left these endpoints for convenience, they're not required in the assignment requirements**
 
 ## Getting Started
-**API is accessible at http://ec2-3-74-233-238.eu-central-1.compute.amazonaws.com/docs**
+**API is accessible at http://ec2-52-57-93-232.eu-central-1.compute.amazonaws.com/docs**
 NOTE: make sure the protocol is HTTP in your browser, haven't had the time to configure nginx with certbot from scratch properly
 
 1.  **Environment Setup**: Copy `.env-example` to `.env` and fill in your Odoo credentials and database configuration.
